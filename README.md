@@ -1,2 +1,7 @@
-# AI-Lecture-Studio
-AI Lecture Studio is an NLP-driven system that transforms audio and video lectures into structured study materials. It performs speech-to-text transcription using Whisper and generates summaries, quizzes, and flashcards using transformer-based language models, with PDF export functionality.
+]🎙️ AI Lecture Studio
+
+Transforming Audio & Video Lectures into Intelligent Study Materials Using AI
+
+AI Lecture Studio is an NLP-powered lecture processing system that converts audio and video recordings into structured, revision-ready study resources. It leverages advanced speech recognition and transformer-based language models to automatically generate clear summaries, practice quizzes, and flashcards, with seamless PDF export functionality.
+
+Built using modern AI pipelines, the system demonstrates practical integration of speech-to-text technology and generative AI for real-world educational applications.
