@@ -1,4 +1,4 @@
-]🎙️ AI Lecture Studio
+#🎙️ AI Lecture Studio
 
 Transforming Audio & Video Lectures into Intelligent Study Materials Using AI
 
