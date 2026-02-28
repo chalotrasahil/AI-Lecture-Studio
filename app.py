@@ -17,14 +17,12 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* GLOBAL */
 html, body, [class*="css"] {
     background-color: #0b0b0b;
     color: white;
     font-family: 'Segoe UI', sans-serif;
 }
 
-/* TITLE */
 .main-title {
     text-align: center;
     font-size: 40px;
@@ -40,7 +38,6 @@ html, body, [class*="css"] {
     margin-bottom: 25px;
 }
 
-/* BUTTONS */
 .stButton>button {
     background: linear-gradient(90deg, #ff7a00, #ffb347);
     color: black;
@@ -54,7 +51,6 @@ html, body, [class*="css"] {
     transform: scale(1.02);
 }
 
-/* CARDS */
 .card {
     background-color: #151515;
     padding: 20px;
@@ -64,7 +60,6 @@ html, body, [class*="css"] {
     box-shadow: 0 0 20px rgba(255,122,0,0.08);
 }
 
-/* SIDEBAR */
 section[data-testid="stSidebar"] {
     background-color: #111111;
 }
@@ -79,7 +74,7 @@ section[data-testid="stSidebar"] {
 # ================= HEADER ================= #
 
 st.markdown('<div class="main-title">🎙️ AI Lecture Studio</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Voice-to-Notes AI | Optimized for 2–3 Min Lectures</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">Lecture Voice-to-Notes Generator</div>', unsafe_allow_html=True)
 
 st.divider()
 
@@ -96,7 +91,7 @@ with st.sidebar:
 def load_models():
     asr = pipeline(
         "automatic-speech-recognition",
-        model="openai/whisper-base"
+        model="openai/whisper-tiny"  # Free-tier safe
     )
 
     generator = pipeline(
@@ -106,12 +101,11 @@ def load_models():
 
     return asr, generator
 
-with st.spinner("🚀 Loading AI Models..."):
-    asr, generator = load_models()
+asr, generator = load_models()
 
 # ================= HELPERS ================= #
 
-def split_text(text, chunk_size=900):  # smaller chunk for stability
+def split_text(text, chunk_size=800):
     return [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
 
 def export_pdf(content):
@@ -120,6 +114,7 @@ def export_pdf(content):
     pdf.add_page()
     pdf.set_font("Arial", size=11)
     pdf.multi_cell(0, 7, content)
+
     file_path = "Lecture_Notes.pdf"
     pdf.output(file_path)
     return file_path
@@ -127,11 +122,11 @@ def export_pdf(content):
 # ================= FILE UPLOAD ================= #
 
 uploaded_file = st.file_uploader(
-    "Upload Lecture (WAV, MP3, MP4) — Recommended under 25MB",
-    type=["wav", "mp3", "mp4"]
+    "Upload Lecture Audio (WAV or MP3) — Recommended under 25MB",
+    type=["wav", "mp3"]
 )
 
-# ================= MAIN ================= #
+# ================= MAIN PROCESS ================= #
 
 if uploaded_file:
 
@@ -146,7 +141,7 @@ if uploaded_file:
     # -------- TRANSCRIPTION -------- #
     st.markdown("## 🎤 Transcription")
 
-    with st.spinner("Transcribing..."):
+    with st.spinner("Transcribing audio..."):
         transcript = asr(temp_path)["text"]
 
     progress.progress(40)
@@ -161,13 +156,17 @@ if uploaded_file:
         # -------- SUMMARY -------- #
         st.markdown("## 📚 Structured Notes")
 
-        with st.spinner("Generating summary..."):
+        with st.spinner("Generating structured notes..."):
             chunks = split_text(transcript)
             summaries = []
 
             for chunk in chunks:
-                prompt = f"Summarize this lecture clearly in structured bullet points:\n{chunk}"
-                result = generator(prompt, max_length=summary_length, do_sample=False)
+                prompt = f"Summarize this lecture in clear structured bullet points:\n{chunk}"
+                result = generator(
+                    prompt,
+                    max_length=summary_length,
+                    do_sample=False
+                )
                 summaries.append(result[0]["generated_text"])
 
             final_summary = " ".join(summaries)
@@ -188,7 +187,7 @@ if uploaded_file:
         st.write(quiz)
         st.markdown('</div>', unsafe_allow_html=True)
 
-        progress.progress(90)
+        progress.progress(85)
 
         # -------- FLASHCARDS -------- #
         st.markdown("## 📌 Flashcards")
@@ -207,7 +206,7 @@ if uploaded_file:
 TRANSCRIPT:
 {transcript}
 
-SUMMARY:
+STRUCTURED NOTES:
 {final_summary}
 
 QUIZ:
