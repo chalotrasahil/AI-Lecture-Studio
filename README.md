@@ -1,61 +1,117 @@
 # AI Lecture Studio 🎙️
 
-AI Lecture Studio is an AI-powered academic web application that converts audio and video lectures into structured study materials.
+AI Lecture Studio is an AI-powered academic web application that transforms audio and video lecture recordings into structured study material.
 
-It integrates Automatic Speech Recognition (ASR) and Natural Language Processing (NLP) to generate:
+The system integrates Automatic Speech Recognition (ASR) and Natural Language Processing (NLP) to automatically generate:
 
-- Automatic Topic Identification
-- Structured Academic Summaries
-- Conceptual Exam Questions
-- Intelligent Revision Flashcards
-- Downloadable PDF Study Notes
+- Main Topic Identification  
+- Structured Academic Summaries  
+- Conceptual Exam Questions  
+- Intelligent Revision Flashcards  
+- Downloadable PDF Study Notes  
 
 ---
 
-## 🚀 Features
+## 🚀 Key Features
 
-- Whisper-based speech-to-text transcription
-- Smart text chunking (no truncation loss)
-- AI-generated 6 structured bullet summaries
-- Guaranteed 5 unique conceptual questions
-- Guaranteed 4 unique flashcards
-- Premium UI with performance tracking
-- PDF export functionality
+- 🎧 Whisper-based Speech-to-Text Transcription  
+- 🧠 Automatic Topic Detection  
+- 📚 6 Structured Academic Bullet Summaries  
+- ❓ Guaranteed 5 Unique Conceptual Questions  
+- 📌 Guaranteed 4 Intelligent Flashcards  
+- 📄 PDF Export Functionality  
+- ⚡ Performance Time Tracking  
+- 🎨 Premium Modern UI (Streamlit)
 
 ---
 
 ## 🛠 Technologies Used
 
-- Python
-- Streamlit
-- Hugging Face Transformers
-- Whisper (openai/whisper-base)
-- FLAN-T5 (google/flan-t5-base)
-- Torch
-- FPDF
+- Python  
+- Streamlit  
+- Hugging Face Transformers  
+- Whisper (`openai/whisper-base`)  
+- FLAN-T5 (`google/flan-t5-base`)  
+- Torch  
+- FPDF  
+
+---
+
+## 📂 Project Structure
+
+```bash
+AI-Lecture-Studio/
+│
+├── app.py
+├── requirements.txt
+├── README.md
+├── .gitignore
+└── LICENSE
+```
+
+---
+
+## 🚀 Clone the Repository
+
+To clone this project locally:
+
+```bash
+git clone https://github.com/chalotrasahil/AI-Lecture-Studio.git
+```
+
+Navigate into the project directory:
+
+```bash
+cd AI-Lecture-Studio
+```
+
+---
+
+## ▶ Run Locally
+
+1. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+2. Run the application:
+
+```bash
+streamlit run app.py
+```
+
+The app will open in your browser automatically.
 
 ---
 
 ## 🌐 Deployment
 
-Deployed on Hugging Face Spaces.
+The application is deployed on Hugging Face Spaces.
+
+(Insert your Hugging Face Spaces deployment link here.)
 
 ---
 
-## ▶ How to Run Locally
+## 🎓 Academic Context
 
-1. Clone the repository:
-   git clone https://github.com/yourusername/ai-lecture-studio.git
+This project was developed as a Capstone Project to demonstrate the real-world application of Artificial Intelligence in the education domain using:
 
-2. Navigate to folder:
-   cd ai-lecture-studio
-
-3. Install dependencies:
-   pip install -r requirements.txt
-
-4. Run the app:
-   streamlit run app.py
+- Automatic Speech Recognition  
+- Transformer-based Text Generation  
+- End-to-End AI Integration  
 
 ---
 
-Developed as a Capstone Project.
+## 📌 Future Enhancements
+
+- Multi-language lecture support  
+- Real-time live lecture transcription  
+- User authentication and progress tracking  
+- Advanced LLM integration  
+- Mobile-responsive version  
+
+---
+
+Developed by Sahil Chalotra  
+Capstone Project – Computer Science & Engineering
