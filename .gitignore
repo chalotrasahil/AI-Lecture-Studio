@@ -1,60 +1,39 @@
-# ==============================
 # Python
-# ==============================
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 *.so
 
-# ==============================
 # Virtual Environments
-# ==============================
 venv/
 env/
 .venv/
 ENV/
 
-# ==============================
 # Environment Variables
-# ==============================
 .env
 
-# ==============================
 # Streamlit
-# ==============================
 .streamlit/
 
-# ==============================
 # Hugging Face / Transformers Cache
-# (VERY IMPORTANT - models are large)
-# ==============================
 .cache/
 cache/
 huggingface/
 hf_cache/
 
-# ==============================
 # Generated Output Files
-# (Your app generates this)
-# ==============================
 Lecture_Notes.pdf
-*.pdf
 
-# ==============================
 # Temporary Files
-# ==============================
 *.log
 *.tmp
 
-# ==============================
 # IDE / Editor Files
-# ==============================
 .vscode/
 .idea/
 
-# ==============================
 # OS Files
-# ==============================
 .DS_Store
 Thumbs.db
