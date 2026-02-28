@@ -1,6 +1,5 @@
 import streamlit as st
 from transformers import pipeline
-import tempfile
 import os
 from fpdf import FPDF
 
@@ -12,11 +11,10 @@ st.set_page_config(
     layout="wide"
 )
 
-# ================= PREMIUM BLACK + ORANGE UI ================= #
+# ================= UI STYLING ================= #
 
 st.markdown("""
 <style>
-
 html, body, [class*="css"] {
     background-color: #0b0b0b;
     color: white;
@@ -47,27 +45,13 @@ html, body, [class*="css"] {
     border: none;
 }
 
-.stButton>button:hover {
-    transform: scale(1.02);
-}
-
 .card {
     background-color: #151515;
     padding: 20px;
     border-radius: 16px;
     margin-bottom: 20px;
     border: 1px solid #1f1f1f;
-    box-shadow: 0 0 20px rgba(255,122,0,0.08);
 }
-
-section[data-testid="stSidebar"] {
-    background-color: #111111;
-}
-
-.stProgress > div > div > div > div {
-    background-color: #ff7a00;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -75,7 +59,6 @@ section[data-testid="stSidebar"] {
 
 st.markdown('<div class="main-title">🎙️ AI Lecture Studio</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">Lecture Voice-to-Notes Generator</div>', unsafe_allow_html=True)
-
 st.divider()
 
 # ================= SIDEBAR ================= #
@@ -91,7 +74,7 @@ with st.sidebar:
 def load_models():
     asr = pipeline(
         "automatic-speech-recognition",
-        model="openai/whisper-tiny"  # Free-tier safe
+        model="openai/whisper-tiny"
     )
 
     generator = pipeline(
@@ -132,9 +115,11 @@ if uploaded_file:
 
     st.success(f"Uploaded: {uploaded_file.name}")
 
-    with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        tmp.write(uploaded_file.read())
-        temp_path = tmp.name
+    # Save file safely in working directory
+    temp_path = f"./{uploaded_file.name}"
+
+    with open(temp_path, "wb") as f:
+        f.write(uploaded_file.read())
 
     progress = st.progress(0)
 
@@ -226,4 +211,5 @@ FLASHCARDS:
                 mime="application/pdf"
             )
 
+    # Clean up
     os.remove(temp_path)
