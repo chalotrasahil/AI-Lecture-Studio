@@ -1,5 +1,5 @@
 streamlit
-transformers
-torch
-sentencepiece
+google-genai
+pydantic
+python-dotenv
 fpdf
