@@ -3,3 +3,6 @@ google-genai
 pydantic
 python-dotenv
 fpdf
+fastapi
+uvicorn[standard]
+python-multipart
