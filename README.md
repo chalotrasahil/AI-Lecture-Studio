@@ -200,19 +200,6 @@ Returns
 
 ---
 
-## 📸 Screenshots
-
-Add screenshots of your application here.
-
-| Home Page | Summary |
-|-----------|---------|
-| *(Add Image)* | *(Add Image)* |
-
-| Quiz | Flashcards |
-|------|------------|
-| *(Add Image)* | *(Add Image)* |
-
----
 
 ## 🎯 Future Improvements
 
