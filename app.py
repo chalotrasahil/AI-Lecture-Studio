@@ -270,6 +270,34 @@ html, body, [class*="css"], .stMarkdown {
     letter-spacing: -1.5px;
 }
 
+.block-container {
+    max-width: 1280px !important;
+    padding-left: 1.2rem !important;
+    padding-right: 1.2rem !important;
+}
+
+.metric-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 1024px) {
+    .main-title {
+        font-size: 3.1rem;
+    }
+
+    .sub-desc {
+        font-size: 1.05rem;
+    }
+
+    .block-container {
+        padding-left: 0.9rem !important;
+        padding-right: 0.9rem !important;
+    }
+}
+
 @media (max-width: 768px) {
     .main-title {
         font-size: 2.3rem;
@@ -293,8 +321,12 @@ html, body, [class*="css"], .stMarkdown {
     }
 
     .metric-container {
-        flex-direction: column;
+        grid-template-columns: 1fr;
         gap: 10px;
+    }
+
+    .stTabs [data-baseweb="tab-list"] {
+        flex-wrap: wrap;
     }
 
     .stTabs [data-baseweb="tab"] {
@@ -322,6 +354,11 @@ html, body, [class*="css"], .stMarkdown {
 
     .premium-card {
         padding: 14px;
+    }
+
+    [data-testid="stSidebar"] {
+        width: 100% !important;
+        max-width: none !important;
     }
 }
 
