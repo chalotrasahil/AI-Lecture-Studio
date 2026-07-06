@@ -1,6 +1,8 @@
 import streamlit as st
 import os
 import time
+import json
+from datetime import datetime
 from google import genai
 from google.genai import types
 from pydantic import BaseModel, Field
@@ -10,6 +12,57 @@ from dotenv import load_dotenv
 
 # Load environment variables (useful if running with local .env file)
 load_dotenv()
+
+
+# ================ USER PROFILE STORAGE ================ #
+USERS_FILE = "users.json"
+
+def load_users():
+    if not os.path.exists(USERS_FILE):
+        return {}
+    try:
+        with open(USERS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def save_users(data):
+    with open(USERS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def ensure_user(username: str):
+    users = load_users()
+    if username not in users:
+        users[username] = {"username": username, "topics": [], "quizzes": []}
+        save_users(users)
+    return users[username]
+
+def record_topic_view(username: str, topic: str):
+    if not username:
+        return
+    users = load_users()
+    user = users.get(username) or {"username": username, "topics": [], "quizzes": []}
+    user_entry = {"topic": topic, "timestamp": datetime.utcnow().isoformat()}
+    user.setdefault("topics", []).append(user_entry)
+    users[username] = user
+    save_users(users)
+
+def record_quiz_result(username: str, topic: str, score: int, total: int):
+    if not username:
+        return
+    users = load_users()
+    user = users.get(username) or {"username": username, "topics": [], "quizzes": []}
+    passed = total > 0 and (score / total) >= 0.8
+    quiz_entry = {
+        "topic": topic,
+        "score": score,
+        "total": total,
+        "passed": passed,
+        "timestamp": datetime.utcnow().isoformat(),
+    }
+    user.setdefault("quizzes", []).append(quiz_entry)
+    users[username] = user
+    save_users(users)
 
 # ================= PAGE CONFIG ================= #
 st.set_page_config(
@@ -37,15 +90,87 @@ else:
     3. Access structured academic insights instantly!
     """)
 
+def reset_current_lecture_state():
+    st.session_state.study_materials = None
+    st.session_state.pdf_path = None
+    st.session_state.active_quiz = None
+    st.session_state.last_file_name = None
+    st.session_state.quiz_index = 0
+    st.session_state.quiz_score = 0
+    st.session_state.quiz_completed = False
+    st.session_state.quiz_recorded = False
+    st.session_state.quiz_user_answers = {}
+    st.session_state.quiz_show_explanation = False
+    st.session_state.generation_time = None
+
 # Cache clearing button
 if st.sidebar.button("🗑️ Clear caches"):
-    st.caching.clear_cache()
-    st.sidebar.success("✅ Caches cleared.")
+    try:
+        st.cache_data.clear()
+    except AttributeError:
+        pass
+    try:
+        st.cache_resource.clear()
+    except AttributeError:
+        pass
+    reset_current_lecture_state()
+    st.sidebar.success("✅ Caches cleared and current lecture state reset. Saved user history remains intact.")
+
+# ----------------- User Profile Sidebar ----------------- #
+if "username" not in st.session_state:
+    st.session_state.username = os.getenv("DEFAULT_USERNAME", "")
+if "theme" not in st.session_state:
+    st.session_state.theme = os.getenv("DEFAULT_THEME", "dark").lower()
+
+st.sidebar.markdown("### 🎨 Theme")
+selected_theme = st.sidebar.radio(
+    "Choose theme:",
+    ["🌙 Dark", "☀️ Light"],
+    index=0 if st.session_state.theme == "dark" else 1,
+    help="Switch between dark and light app themes.")
+st.session_state.theme = "dark" if selected_theme.startswith("🌙") else "light"
+st.sidebar.markdown(f"**Current theme:** {selected_theme}")
+
+st.sidebar.markdown("### 👤 User Profile")
+username_input = st.sidebar.text_input("Username", value=st.session_state.username, key="username_input")
+if st.sidebar.button("Save Profile"):
+    uname = username_input.strip()
+    st.session_state.username = uname
+    if uname:
+        ensure_user(uname)
+        st.sidebar.success("✅ Profile saved.")
+    else:
+        st.sidebar.error("Please enter a username.")
+
+if st.session_state.username:
+    users = load_users()
+    user = users.get(st.session_state.username, {})
+    st.sidebar.markdown("**Recent Topics**")
+    topics = user.get("topics", [])[-5:][::-1]
+    if topics:
+        for t in topics:
+            ts = t.get("timestamp", "")
+            st.sidebar.write(f"- {t.get('topic')} \n  [{ts}]")
+    else:
+        st.sidebar.write("No topics yet.")
+
+    st.sidebar.markdown("**Quiz History**")
+    quizzes = user.get("quizzes", [])
+    if quizzes:
+        passed_count = sum(1 for q in quizzes if q.get("passed"))
+        st.sidebar.markdown(f"- Total quizzes attempted: **{len(quizzes)}**")
+        st.sidebar.markdown(f"- Quizzes passed (≥80%): **{passed_count}**")
+        st.sidebar.markdown("\n**Recent Quiz Results**")
+        recent_quizzes = quizzes[-5:][::-1]
+        for q in recent_quizzes:
+            passed_text = "Passed" if q.get("passed") else "Failed"
+            st.sidebar.write(f"- {q.get('topic')}: {q.get('score')}/{q.get('total')} ({passed_text})  [{q.get('timestamp', '')}]")
+    else:
+        st.sidebar.write("No quizzes yet.")
 
 # ================= PREMIUM UI CUSTOM STYLING ================= #
 st.markdown("""
 <style>
-/* Dark mode variables */
 :root {
     --bg-color: #0e1117;
     --text-color: #e5e7eb;
@@ -55,35 +180,24 @@ st.markdown("""
     --flashcard-front-bg2: #4ca1af;
     --flashcard-back-bg: #e74c3c;
     --flashcard-back-bg2: #c0392b;
+    --button-bg: linear-gradient(135deg, #ff8a3d, #ff5e7a);
+    --button-text: #ffffff;
 }
 
-/* Light mode defaults (override if needed) */
 body {
-    background-color: #ffffff;
-    color: #000000;
+    background: transparent;
+    color: inherit;
+    transition: background 0.4s ease, color 0.4s ease;
 }
 
-/* Dark mode overrides */
-.dark-mode body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-}
-.dark-mode .premium-card {
-    background: var(--card-bg);
-    border-color: var(--card-border);
-}
-.dark-mode .main-title, .dark-mode .sub-desc {
-    color: var(--text-color);
-}
-
-/* Use CSS variables for flashcards */
-.dark-mode .flip-card-front {
-    background: linear-gradient(135deg, var(--flashcard-front-bg) 0%, var(--flashcard-front-bg2) 100%);
-    color: #eaeaea;
-}
-.dark-mode .flip-card-back {
-    background: linear-gradient(135deg, var(--flashcard-back-bg) 0%, var(--flashcard-back-bg2) 100%);
-    color: #fdfdfd;
+.stButton>button {
+    border-radius: 999px !important;
+    padding: 0.95rem 1.8rem !important;
+    border: none !important;
+    background: linear-gradient(135deg, #ff8a3d, #ff5e7a) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&display=swap');
@@ -160,6 +274,20 @@ html, body, [class*="css"], .stMarkdown {
     border-color: rgba(255, 142, 83, 0.25);
     box-shadow: 0 15px 35px rgba(255, 142, 83, 0.08), 0 5px 15px rgba(0, 0, 0, 0.2);
     background: rgba(255, 255, 255, 0.04);
+}
+
+.stButton>button {
+    border-radius: 999px !important;
+    padding: 0.95rem 1.8rem !important;
+    border: none !important;
+    background: linear-gradient(135deg, #ff8a3d, #ff5e7a) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 14px 25px rgba(255, 138, 61, 0.18) !important;
+}
+
+.stButton>button:hover {
+    transform: translateY(-1px);
 }
 
 .metric-container {
@@ -338,6 +466,89 @@ html, body, [class*="css"], .stMarkdown {
 </style>
 """, unsafe_allow_html=True)
 
+app_theme = st.session_state.theme
+if app_theme == "light":
+    page_bg = "radial-gradient(circle at top left, #f7f8ff 0%, #eef2ff 45%, #f8fafc 100%)"
+    text_color = "#0f172a"
+    sidebar_bg = "rgba(255, 255, 255, 0.95)"
+    card_bg = "rgba(255, 255, 255, 0.96)"
+    input_bg = "#f8fafc"
+    border_color = "rgba(148, 163, 184, 0.25)"
+    button_bg = "linear-gradient(135deg, #4f46e5, #22c55e)"
+    button_text = "#ffffff"
+    tab_active_bg = "rgba(59, 130, 246, 0.15)"
+    highlight_color = "#0f172a"
+else:
+    page_bg = "radial-gradient(circle at top left, #111827 0%, #0f172a 45%, #020617 100%)"
+    text_color = "#e5e7eb"
+    sidebar_bg = "rgba(15, 23, 42, 0.92)"
+    card_bg = "rgba(15, 23, 42, 0.78)"
+    input_bg = "#111827"
+    border_color = "rgba(148, 163, 184, 0.18)"
+    button_bg = "linear-gradient(135deg, #ff8a3d, #ff5e7a)"
+    button_text = "#ffffff"
+    tab_active_bg = "rgba(255, 142, 83, 0.18)"
+    highlight_color = "#FF8E53"
+
+st.markdown(f"""
+<style>
+[data-testid="stAppViewContainer"] {{
+    background: {page_bg} !important;
+    color: {text_color} !important;
+}}
+
+[data-testid="stSidebar"] {{
+    background: {sidebar_bg} !important;
+    color: {text_color} !important;
+}}
+
+[data-testid="stSidebar"] *,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] div,
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] h4,
+[data-testid="stSidebar"] h5,
+[data-testid="stSidebar"] h6 {{
+    color: {text_color} !important;
+}}
+
+.stButton>button {{
+    background: {button_bg} !important;
+    color: {button_text} !important;
+}}
+
+.stTextInput>div input::placeholder,
+.stTextArea>div textarea::placeholder {{
+    color: rgba(31, 41, 55, 0.5) !important;
+}}
+
+.stTextInput>div, .stFileUploader, .stSelectbox, .stMultiSelect, .stTextArea, .stNumberInput>div {{
+    background: {input_bg} !important;
+    border-color: {border_color} !important;
+    color: {text_color} !important;
+}}
+
+.stTabs [aria-selected="true"] {{
+    background-color: {tab_active_bg} !important;
+    color: {highlight_color} !important;
+}}
+
+.premium-card, .metric-box, .stAlert {{
+    background: {card_bg} !important;
+    border-color: {border_color} !important;
+    color: {text_color} !important;
+}}
+
+.main-title, .sub-desc {{
+    color: {text_color} !important;
+}}
+</style>
+""", unsafe_allow_html=True)
+
 st.markdown('<div class="main-title">AI Lecture Studio 🎙️</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-desc">Convert your lecture recordings into elegant, structured notes, interactive quizzes, flashcards, and ready‑to‑download PDFs, powered by advanced AI technology.</div>', unsafe_allow_html=True)
 st.divider()
@@ -431,6 +642,31 @@ def export_pdf(data: LectureStudyMaterials, quiz=None):
     pdf.output(filename)
     return filename
 
+def generate_content_with_retry(client, model, contents, config, max_attempts=3, base_delay=2, status_callback=None):
+    attempt = 0
+    while True:
+        attempt += 1
+        try:
+            return client.models.generate_content(
+                model=model,
+                contents=contents,
+                config=config,
+            )
+        except Exception as exc:
+            message = str(exc).lower()
+            is_temporary = (
+                "503" in message or
+                "unavailable" in message or
+                "high demand" in message or
+                "service unavailable" in message
+            )
+            if not is_temporary or attempt >= max_attempts:
+                raise
+            if status_callback:
+                status_callback(f"⚠️ Temporary service load issue, retrying ({attempt}/{max_attempts})...")
+            time.sleep(base_delay * attempt)
+
+
 def process_lecture(file_path, client):
     # Upload file via AI service Files API
     with st.spinner("🚀 Processing your lecture – please wait..."):
@@ -468,16 +704,15 @@ def process_lecture(file_path, client):
             4. Generate exactly 4 revision flashcards containing key terms/concepts and explanations.
             """
             
-            response = client.models.generate_content(
+            response = generate_content_with_retry(
+                client,
                 model="gemini-2.5-flash",
-                contents=[
-                    uploaded_file,
-                    prompt
-                ],
+                contents=[uploaded_file, prompt],
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
                     response_schema=LectureStudyMaterials,
                 ),
+                status_callback=status_text.info,
             )
             
             # Parse the response text to the Pydantic schema
@@ -504,13 +739,15 @@ def generate_dynamic_quiz(client, context_summary, quiz_num, quiz_diff):
         Each question must include exactly 4 multiple-choice options, a correct option, and a detailed explanation of why it is correct.
         """
         
-        response = client.models.generate_content(
+        response = generate_content_with_retry(
+            client,
             model="gemini-2.5-flash",
             contents=[prompt],
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 response_schema=QuizQuestionsResponse,
             ),
+            status_callback=None,
         )
         
         # Parse the response text
@@ -554,6 +791,7 @@ if uploaded_file:
         st.session_state.quiz_index = 0
         st.session_state.quiz_score = 0
         st.session_state.quiz_completed = False
+        st.session_state.quiz_recorded = False
         st.session_state.quiz_user_answers = {}
         st.session_state.quiz_show_explanation = False
 
@@ -593,6 +831,13 @@ if uploaded_file:
                     
                     # Pre-compile and cache PDF (initial version without quiz)
                     st.session_state.pdf_path = export_pdf(data)
+
+                    # Record that this user viewed a topic
+                    if st.session_state.get("username"):
+                        try:
+                            record_topic_view(st.session_state.username, data.academic_topic)
+                        except Exception:
+                            pass
             except Exception as e:
                 st.error(f"An error occurred during processing: {str(e)}")
             finally:
@@ -710,6 +955,7 @@ if st.session_state.study_materials:
                     st.session_state.quiz_completed = False
                     st.session_state.quiz_user_answers = {}
                     st.session_state.quiz_show_explanation = False
+                    st.session_state.quiz_recorded = False
                     
                     # Update cache PDF with the newly generated quiz questions
                     st.session_state.pdf_path = export_pdf(data, quiz_questions)
@@ -773,6 +1019,14 @@ if st.session_state.study_materials:
             else:
                 score = st.session_state.quiz_score
                 pct = int((score / quiz_len) * 100)
+
+                # Record quiz result to user profile (once)
+                if st.session_state.get("username") and not st.session_state.get("quiz_recorded", False):
+                    try:
+                        record_quiz_result(st.session_state.username, data.academic_topic, score, quiz_len)
+                        st.session_state.quiz_recorded = True
+                    except Exception:
+                        pass
                 
                 st.markdown('<div style="text-align: center; padding: 20px 10px;">', unsafe_allow_html=True)
                 if pct >= 80:
@@ -838,6 +1092,7 @@ if st.session_state.study_materials:
                         st.session_state.quiz_completed = False
                         st.session_state.quiz_user_answers = {}
                         st.session_state.quiz_show_explanation = False
+                        st.session_state.quiz_recorded = False
                         
                         # Re-compile PDF including the new quiz questions
                         st.session_state.pdf_path = export_pdf(data, quiz_questions)

@@ -6,3 +6,4 @@ fpdf
 fastapi
 uvicorn[standard]
 python-multipart
+pytube
