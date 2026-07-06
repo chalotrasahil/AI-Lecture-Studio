@@ -270,6 +270,61 @@ html, body, [class*="css"], .stMarkdown {
     letter-spacing: -1.5px;
 }
 
+@media (max-width: 768px) {
+    .main-title {
+        font-size: 2.3rem;
+        line-height: 1.1;
+        letter-spacing: -0.8px;
+    }
+
+    .sub-desc {
+        font-size: 1rem;
+        padding: 0 0.25rem;
+    }
+
+    .premium-card {
+        padding: 16px;
+        border-radius: 14px;
+    }
+
+    .stButton>button {
+        width: 100% !important;
+        padding: 0.8rem 1rem !important;
+    }
+
+    .metric-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+
+    .flip-card {
+        height: 180px;
+    }
+
+    .flip-card-front, .flip-card-back {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-title {
+        font-size: 1.9rem;
+    }
+
+    .sub-desc {
+        font-size: 0.95rem;
+    }
+
+    .premium-card {
+        padding: 14px;
+    }
+}
+
 @keyframes gradientFlow {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
