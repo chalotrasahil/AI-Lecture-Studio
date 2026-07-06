@@ -1,55 +1,63 @@
 # 🎙️ AI Lecture Studio
 
 <p align="center">
-  <b>Transform lecture recordings into structured study materials using Google Gemini 2.5 Flash.</b>
+  <strong>Transform lecture recordings into intelligent study materials with Google Gemini 2.5 Flash.</strong>
 </p>
 
 <p align="center">
 
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![Gemini](https://img.shields.io/badge/Google-Gemini_2.5_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Google Gemini](https://img.shields.io/badge/Google-Gemini_2.5_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+[![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 </p>
+
+---
+
+## 🚀 Live Demo
+
+**🌐 Web Application**
+
+https://ai-lecture-studio.onrender.com/
 
 ---
 
 ## 📖 Overview
 
-AI Lecture Studio is an AI-powered web application that automatically converts lecture recordings into comprehensive study materials.
+AI Lecture Studio is an AI-powered educational platform that converts lecture recordings into structured study materials using **Google Gemini 2.5 Flash**.
 
-Simply upload an **MP3, WAV, or MP4** lecture recording, and the application uses **Google Gemini 2.5 Flash** to generate:
+Upload a lecture recording, and the application automatically generates:
 
-- 🎙 Accurate lecture transcript
-- 📚 Structured academic summary
-- 🎯 Main lecture topic
-- 🧠 Interactive revision flashcards
-- ❓ Dynamic multiple-choice quizzes
-- 📄 Downloadable PDF study notes
+- 🎙️ Lecture Transcript
+- 📚 Structured Summary
+- 🎯 Main Topic
+- 🧠 Revision Flashcards
+- ❓ Interactive MCQ Quiz
+- 📄 Downloadable PDF Notes
 
-The application provides an intuitive Streamlit interface while FastAPI powers backend services for scalable AI processing.
+The application combines a **Streamlit frontend**, **FastAPI backend**, and **Google Gemini AI** to create a complete AI-powered learning experience.
 
 ---
 
 ## ✨ Features
 
-- 🎙 Automatic lecture transcription
+- 🎙️ Automatic lecture transcription
 - 📚 AI-generated structured summaries
-- 🎯 Automatic topic identification
+- 🎯 Automatic topic detection
 - 🧠 Interactive revision flashcards
 - ❓ Dynamic quiz generation
-- 📄 Export notes as PDF
-- 👤 User profiles
+- 📄 PDF study notes export
+- 👤 User profile management
 - 📊 Quiz history tracking
 - 🌙 Dark & Light mode
-- ⚡ FastAPI REST API
-- 💻 Modern Streamlit interface
+- ⚡ REST API using FastAPI
+- 📱 Clean and responsive UI
 
 ---
 
-## 🛠 Tech Stack
+## 🛠️ Tech Stack
 
 | Category | Technology |
 |----------|------------|
@@ -57,7 +65,7 @@ The application provides an intuitive Streamlit interface while FastAPI powers b
 | Frontend | Streamlit |
 | Backend | FastAPI |
 | AI Model | Google Gemini 2.5 Flash |
-| AI SDK | Google GenAI SDK |
+| SDK | Google GenAI SDK |
 | Data Validation | Pydantic |
 | PDF Generation | FPDF |
 | Environment | python-dotenv |
@@ -74,14 +82,14 @@ AI-Lecture-Studio/
 ├── lecture_service.py
 ├── users.json
 ├── requirements.txt
-├── README.md
 ├── .env
+├── README.md
 └── LICENSE
 ```
 
 ---
 
-## 🚀 Installation
+## ⚙️ Installation
 
 ### Clone Repository
 
@@ -96,21 +104,25 @@ cd AI-Lecture-Studio
 pip install -r requirements.txt
 ```
 
-### Create Environment File
+### Configure Environment Variables
 
-Create a `.env` file in the project directory.
+Create a `.env` file.
 
 ```env
 GEMINI_API_KEY=YOUR_API_KEY
 ```
 
-### Run Streamlit Application
+---
+
+## ▶️ Run Application
+
+### Streamlit
 
 ```bash
 streamlit run app.py
 ```
 
-### Run FastAPI Backend (Optional)
+### FastAPI
 
 ```bash
 uvicorn api:app --reload
@@ -118,30 +130,38 @@ uvicorn api:app --reload
 
 ---
 
-## 📋 Workflow
+## 📋 Application Workflow
 
 ```text
 Upload Lecture
-      │
-      ▼
+(MP3 • WAV • MP4)
+        │
+        ▼
 Google Gemini Files API
-      │
-      ▼
-Gemini 2.5 Flash
-      │
-      ├────────► Transcript
-      ├────────► Topic Detection
-      ├────────► Summary
-      ├────────► Flashcards
-      └────────► Quiz
-                  │
-                  ▼
-           PDF Study Notes
+        │
+        ▼
+Google Gemini 2.5 Flash
+        │
+ ┌──────┼──────────┐
+ │      │          │
+ ▼      ▼          ▼
+Transcript Summary Topic
+ │      │          │
+ └──────┼──────────┘
+        │
+        ▼
+Flashcards
+        │
+        ▼
+Interactive Quiz
+        │
+        ▼
+PDF Study Notes
 ```
 
 ---
 
-## 📡 API Endpoints
+## 📡 REST API
 
 ### Health Check
 
@@ -149,13 +169,15 @@ Gemini 2.5 Flash
 GET /health
 ```
 
+---
+
 ### Process Lecture
 
 ```http
 POST /process-lecture
 ```
 
-Returns:
+Returns
 
 - Transcript
 - Topic
@@ -170,7 +192,7 @@ Returns:
 POST /generate-quiz
 ```
 
-Returns:
+Returns
 
 - Multiple Choice Questions
 - Correct Answers
@@ -180,27 +202,27 @@ Returns:
 
 ## 📸 Screenshots
 
-Add screenshots here.
+Add screenshots of your application here.
 
-| Home | Summary |
-|------|---------|
-| ![](images/home.png) | ![](images/summary.png) |
+| Home Page | Summary |
+|-----------|---------|
+| *(Add Image)* | *(Add Image)* |
 
 | Quiz | Flashcards |
 |------|------------|
-| ![](images/quiz.png) | ![](images/flashcards.png) |
+| *(Add Image)* | *(Add Image)* |
 
 ---
 
-## 🔮 Future Improvements
+## 🎯 Future Improvements
 
 - 🌍 Multi-language support
-- ☁ Cloud database integration
-- 🔐 User authentication
-- 📈 Learning analytics dashboard
-- 📱 Mobile application
-- 🎤 Live lecture transcription
-- 🤖 Personalized AI tutor
+- 🔐 User Authentication
+- ☁️ Cloud Database
+- 📈 Learning Analytics Dashboard
+- 📱 Mobile Application
+- 🎤 Live Lecture Processing
+- 🤖 Personalized AI Tutor
 
 ---
 
@@ -208,8 +230,8 @@ Add screenshots here.
 
 Contributions are welcome.
 
-1. Fork the repository
-2. Create your feature branch
+1. Fork this repository
+2. Create a new branch
 
 ```bash
 git checkout -b feature-name
@@ -218,22 +240,22 @@ git checkout -b feature-name
 3. Commit your changes
 
 ```bash
-git commit -m "Add new feature"
+git commit -m "Added new feature"
 ```
 
-4. Push to your branch
+4. Push to GitHub
 
 ```bash
 git push origin feature-name
 ```
 
-5. Open a Pull Request
+5. Create a Pull Request
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the **MIT License**.
 
 ---
 
@@ -245,11 +267,16 @@ B.Tech Computer Science & Engineering
 
 Haldia Institute of Technology
 
-GitHub:
+**GitHub**
+
 https://github.com/chalotrasahil
+
+**Live Demo**
+
+https://ai-lecture-studio.onrender.com/
 
 ---
 
 ## ⭐ Support
 
-If you found this project useful, please consider giving it a ⭐ on GitHub.
+If you found this project useful, consider giving it a **⭐ Star** on GitHub.
