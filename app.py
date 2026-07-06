@@ -11,7 +11,30 @@ from fpdf import FPDF
 from dotenv import load_dotenv
 
 # Load environment variables (useful if running with local .env file)
-load_dotenv()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"), override=False)
+load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"), override=False)
+
+
+def get_api_key() -> str:
+    """Return a Gemini API key from environment, Streamlit secrets, or a local .env file."""
+    for key_name in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "GOOGLE_GENAI_API_KEY"):
+        value = os.getenv(key_name, "").strip()
+        if value:
+            return value
+
+    try:
+        if hasattr(st, "secrets"):
+            for key_name in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "GOOGLE_GENAI_API_KEY"):
+                value = st.secrets.get(key_name, "")
+                if isinstance(value, str):
+                    value = value.strip()
+                if value:
+                    return str(value)
+    except Exception:
+        pass
+
+    return ""
 
 
 # ================ USER PROFILE STORAGE ================ #
@@ -75,14 +98,23 @@ st.set_page_config(
 # ================= CONFIGURATION & SIDEBAR ================= #
 
 
-# Read default API Key from environment variable
-env_key = os.getenv("GEMINI_API_KEY", "")
+# Read default API Key from environment variable or secrets
+api_key = get_api_key()
 
-if not env_key:
-    api_key = None
+if not api_key:
+    st.sidebar.warning("🔑 API key not found. Paste it here to enable generation.")
+    manual_api_key = st.sidebar.text_input(
+        "Gemini API Key",
+        type="password",
+        key="manual_gemini_key",
+        placeholder="Paste your API key here",
+        help="This is used for the current session only.",
+    )
+    if manual_api_key:
+        api_key = manual_api_key.strip()
+        st.sidebar.success("✅ API key entered for this session.")
 else:
-    api_key = env_key
-    st.sidebar.success("🔑 API Key loaded from environment.")
+    st.sidebar.success("🔑 API Key loaded successfully.")
     st.sidebar.markdown("""
     ### How to use:
     1. Upload a lecture **audio or video file** (WAV, MP3, MP4).
@@ -805,7 +837,7 @@ if uploaded_file:
     st.markdown('</div>', unsafe_allow_html=True)
 
     if not api_key:
-        st.info("🔹 Demo mode – API key missing. Generation disabled.")
+        st.warning("🔹 Generation is disabled until a valid Gemini API key is provided.")
     else:
         # Enable action button
         if st.button("Generate Study Materials", type="primary"):
